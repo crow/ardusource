@@ -1,36 +1,25 @@
 #include <RFduinoBLE.h>
-#include "LPD8806.h"
+#include <Adafruit_NeoPixel.h>
 #include "SPI.h"
 
-//#include "avr/io.h"
-//#include "avr/wdt.h"wdt.h
-//
-//#define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
+#define PIN 3
 
-
-int nLEDs = 6;
-
-bool lightVestOn;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(5, PIN, NEO_GRB + NEO_KHZ800);
 
 int pattern;
-
 int dataPin  = 1;
 int clockPin = 0;
 int rangedBreathSensorValue;
 
-int heartPin = 5;
-
-LPD8806 strip = LPD8806(nLEDs, dataPin, clockPin);
+int toggler;
 
 void setup() {
-  RFduinoBLE.deviceName = "lightVest";
+  RFduinoBLE.deviceName = "Bracelet";
   // this is the data we want to appear in the advertisement
   // (if the deviceName and advertisementData are too long to fix into the 31 byte
   // ble advertisement packet, then the advertisementData is truncated first down to
   // a single byte, then it will truncate the deviceName)
-  RFduinoBLE.advertisementData = "lightVest";
-
-  //Serial.begin(9600);
+  RFduinoBLE.advertisementData = "Bracelet";
   
   // Start up the LED strip
   strip.begin();
@@ -43,17 +32,11 @@ void setup() {
   
   // start the BLE stack
   RFduinoBLE.begin();
-  
-  
 }
 
 void loop() {
-  // switch to lower power mode
-// if (!lightVestOn) {
-//   RFduino_ULPDelay(INFINITE);
-// }
-
- //setColor(strip.Color(rangedBreathSensorValue,  127,  127));
+  
+    rainbow(20);
 
 }
 
@@ -91,25 +74,31 @@ void RFduinoBLE_onReceive(char *data, int len) {
       uint8_t g = data[2];
       uint8_t b = data[3];
     }
-    //Blink
+    //Rainbow
     if (pattern = 3) {
-    
+      rainbow(20);
     }
     //Chase
     if (pattern = 4) {
     
-    }
-    
-    
+    }  
   }
     if (len >= 3)
   {
-    // get the RGB values
-   
-    rangedBreathSensorValue = data[0];
-    uint8_t heartSensorValue = data[1];
-    //setColor(strip.Color(rangedBreathSensorValue,  rangedBreathSensorValue,  rangedBreathSensorValue));
-    setHue(rangedBreathSensorValue, 255, 100);
+     if (toggler = 1)
+     {
+       rainbow(1000);
+       toggler=2;
+     }
+     if (toggler = 2)
+     {
+       toggler=3;
+     }
+          if (toggler = 3)
+     {
+       toggler=1;
+       strip.Color(data[0], data[1], data[2]); // Blue
+     }
   }
 }
 
@@ -193,3 +182,52 @@ void setHue(int hue, int sat, int val) {
 
 	}
 }
+
+// Fill the dots one after the other with a color
+void colorWipe(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+      delay(wait);
+  }
+}
+
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  if(WheelPos < 85) {
+   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  } else if(WheelPos < 170) {
+   WheelPos -= 85;
+   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else {
+   WheelPos -= 170;
+   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+}
+
