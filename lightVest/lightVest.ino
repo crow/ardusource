@@ -1,26 +1,18 @@
 #include <RFduinoBLE.h>
-#include "LPD8806.h"
 #include "SPI.h"
+#include <Adafruit_NeoPixel.h>
 
-//#include "avr/io.h"
-//#include "avr/wdt.h"wdt.h
-//
-//#define Reset_AVR() wdt_enable(WDTO_30MS); while(1) {}
+#define PIN 2
 
-
-int nLEDs = 6;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(5, PIN, NEO_GRB + NEO_KHZ800);
 
 bool lightVestOn;
 
 int pattern;
 
-int dataPin  = 1;
-int clockPin = 0;
 int rangedBreathSensorValue;
 
 int heartPin = 5;
-
-LPD8806 strip = LPD8806(nLEDs, dataPin, clockPin);
 
 void setup() {
   RFduinoBLE.deviceName = "lightVest";
@@ -32,11 +24,10 @@ void setup() {
 
   //Serial.begin(9600);
   
-  // Start up the LED strip
-  strip.begin();
 
-  // Update the strip, to start they are all 'off'
-  strip.show();
+  strip.begin();
+  strip.setBrightness(05); 
+  strip.show(); // Initialize all pixels to 'off'
   
   //default pattern is rainbow breath
   pattern = 1;
@@ -58,11 +49,9 @@ void loop() {
 }
 
 void RFduinoBLE_onConnect() {
- colorChase(strip.Color(127,  127,  127), 100);
 }
 
 void RFduinoBLE_onDisconnect() {
- colorChase(strip.Color(0,  0,  127), 100);
 }
 
 //data format
@@ -189,7 +178,24 @@ void setHue(int hue, int sat, int val) {
 				break;
 		}
                 //SET TO 1/3RD BRIGHTNESS
+                strip.setPixelColor(0,  strip.Color(r/3,  g/3,  b/3));
+                strip.setPixelColor(1,  strip.Color(r/3,  g/3,  b/3));
+                strip.setPixelColor(2,  strip.Color(r/3,  g/3,  b/3));
+                strip.setPixelColor(3,  strip.Color(r/3,  g/3,  b/3));
+                strip.setPixelColor(4,  strip.Color(r/3,  g/3,  b/3));
                 setColor(strip.Color(r/3,  g/3,  b/3));
+                
 
 	}
 }
+
+// Fill the dots one after the other with a color
+void colorWipe(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+      delay(wait);
+  }
+}
+
+

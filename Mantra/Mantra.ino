@@ -3,10 +3,10 @@
 
 bool mantraBandOn;
 
-int breathPin = 5;
+int breathPin = 3;
 
-int const initialMaxSensorValue = 310;
-int const initialMinSensorValue = 300;
+int const initialMaxSensorValue = 260;
+int const initialMinSensorValue = 1;
 
 int calibratedMaxSensorValue;
 int calibratedMinSensorValue;
@@ -35,6 +35,8 @@ void loop() {
  delay(10);
  sensorValueDelta = analogRead(breathPin);
  Serial.print(sensorValue);       // prints a label
+ Serial.print("\n");
+  Serial.print(sensorValue);       // prints a label
  Serial.print("\n");
 // //high 2 = 127 low 2 = 0 high 1 = 370 low 1 = 210
 // dynamicCalibration();

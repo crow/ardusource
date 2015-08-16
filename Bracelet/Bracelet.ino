@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "SPI.h"
 
-#define PIN 3
+#define PIN 2
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(5, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -36,6 +36,7 @@ void setup() {
 
 void loop() {
   
+    strip.setBrightness(01);
     rainbow(20);
 
 }
@@ -53,10 +54,9 @@ void RFduinoBLE_onDisconnect() {
 void RFduinoBLE_onReceive(char *data, int len) {
   // each transmission should contain power state, RGB triple, pattern
   //when length is 5
-     rangedBreathSensorValue = data[0];
-    uint8_t heartSensorValue = data[1];
+  rangedBreathSensorValue = data[0];
+  uint8_t heartSensorValue = data[1];
 
-  
   if (len >= 5)
   {
     // get the RGB values
@@ -97,7 +97,7 @@ void RFduinoBLE_onReceive(char *data, int len) {
           if (toggler = 3)
      {
        toggler=1;
-       strip.Color(data[0], data[1], data[2]); // Blue
+       strip.Color(data[0], data[1], data[2]); 
      }
   }
 }
